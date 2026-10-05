@@ -1,1 +1,45 @@
-<h1>Velkommen til mitt første skyprosjekt</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Project 1 - Play against Stockfish</title>
+    <!-- Vi henter stilene til sjakkbrettet -->
+    <link rel="stylesheet" href="https://cloudflare.com">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1e1e2e;
+            color: #cdd6f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 { margin-bottom: 10px; color: #a6e3a1; }
+        #board { width: 400px; margin: 20px auto; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .status { margin-top: 15px; font-size: 1.1rem; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>Beat the Cloud Engine</h1>
+    <p>Prosjekt 1: Din personlige sjakkmakker</p>
+    
+    <!-- Her blir sjakkbrettet tegnet inn -->
+    <div id="board"></div>
+    <div class="status" id="status">Ditt trekk (Hvit)</div>
+
+    <!-- Vi laster inn jQuery, Chess.js for regler, og Chessboard.js for brettet -->
+    <script src="https://jquery.com"></script>
+    <script src="https://cloudflare.com"></script>
+    <script src="https://cloudflare.com"></script>
+
+    <script>
+        // Logikken for spillet og Stockfish-integrasjonen legger vi her i neste trekk!
+        console.log("Sjakk-rammeverket er lastet inn.");
+    </script>
+</body>
+</html>
