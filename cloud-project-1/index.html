@@ -37,9 +37,106 @@
     <script src="https://cloudflare.com"></script>
     <script src="https://cloudflare.com"></script>
 
-    <script>
-        // Logikken for spillet og Stockfish-integrasjonen legger vi her i neste trekk!
-        console.log("Sjakk-rammeverket er lastet inn.");
+        <script>
+        var board = null;
+        var game = new Chess();
+        var $status = $('#status');
+
+        // Vi oppretter en kobling til en Stockfish sjakkmotor i skyen/nettleseren
+        var stockfish = new Worker('https://cloudflare.com');
+
+        // Konfigurer Stockfish til å spille på et lavere nivå (Skill Level 0-20)
+        // Level 3-5 gir en fin og overkommelig utfordring for trening!
+        stockfish.postMessage('uci');
+        stockfish.postMessage('setoption name Skill Level value 5');
+
+        function onDragStart (source, piece, position, orientation) {
+            // Ikke la spilleren flytte brikker hvis spillet er over
+            if (game.game_over()) return false;
+
+            // Bare tillat å flytte hvite brikker
+            if (piece.search(/^b/) !== -1) return false;
+        }
+
+        function makeComputerMove () {
+            if (game.game_over()) return;
+
+            // Send gjeldende brettposisjon til Stockfish
+            stockfish.postMessage('position startpos moves ' + game.history({ verbose: true }).map(m => m.from + m.to + (m.promotion || '')).join(' '));
+            
+            // Fortell Stockfish at den skal kalkulere et trekk (vi begrenser søkedybden til 5 trekk for lavere nivå)
+            stockfish.postMessage('go depth 5');
+        }
+
+        // Hør etter svar fra Stockfish-motoren
+        stockfish.onmessage = function(event) {
+            var line = event.data;
+            if (line.indexOf('bestmove') > -1) {
+                var moveStr = line.split(' ')[1];
+                
+                // Gjør trekket i spillmotoren
+                var move = game.move({
+                    from: moveStr.substring(0, 2),
+                    to: moveStr.substring(2, 4),
+                    promotion: moveStr.substring(4, 5) || undefined
+                });
+
+                // Oppdater det visuelle brettet
+                board.position(game.fen());
+                updateStatus();
+            }
+        };
+
+        function onDrop (source, target) {
+            // Sjekk om trekket er lovlig
+            var move = game.move({
+                from: source,
+                to: target,
+                promotion: 'q' // Alltid promoter til dronning for enkelhets skyld
+            });
+
+            // Ulovlig trekk
+            if (move === null) return 'snapback';
+
+            updateStatus();
+            
+            // Start datamaskinens tenkeprosess etter 250ms
+            window.setTimeout(makeComputerMove, 250);
+        }
+
+        function onSnapEnd () {
+            board.position(game.fen());
+        }
+
+        function updateStatus () {
+            var status = '';
+            var moveColor = (game.turn() === 'b') ? 'Svart (Stockfish)' : 'Hvit (Deg)';
+
+            if (game.in_checkmate()) {
+                status = 'Spillet er over. ' + moveColor + ' er i sjakk matt!';
+            } else if (game.in_draw()) {
+                status = 'Spillet er over. Remis (uavgjort).';
+            } else {
+                status = moveColor + ' sitt trekk.';
+                if (game.in_check()) {
+                    status += ' (Sjakk!)';
+                }
+            }
+            $status.html(status);
+        }
+
+        var config = {
+            draggable: true,
+            position: 'start',
+            onDragStart: onDragStart,
+            onDrop: onDrop,
+            onSnapEnd: onSnapEnd
+        };
+        
+        // Initialiser brettet
+        board = Chessboard('board', config);
+        updateStatus();
     </script>
+
 </body>
 </html>
