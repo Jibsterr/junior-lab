@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cloud Project 1 - Play against Stockfish</title>
     <!-- Vi henter stilene til sjakkbrettet -->
-    <link rel="stylesheet" href="https://cloudflare.com">
+    <link rel="stylesheet" href="chessboard.min.css">
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -33,9 +33,9 @@
     <div class="status" id="status">Ditt trekk (Hvit)</div>
 
     <!-- Vi laster inn jQuery, Chess.js for regler, og Chessboard.js for brettet -->
-    <script src="https://jquery.com"></script>
-    <script src="https://cloudflare.com"></script>
-    <script src="https://cloudflare.com"></script>
+    <script src="jquery.min.js"></script>
+    <script src="chess.min.js"></script>
+    <script src="chessboard.min.js"></script>
 
         <script>
         var board = null;
@@ -43,7 +43,7 @@
         var $status = $('#status');
 
         // Vi oppretter en kobling til en Stockfish sjakkmotor i skyen/nettleseren
-        var stockfish = new Worker('https://cloudflare.com');
+        var stockfish = new Worker('stockfish.js');
 
         // Konfigurer Stockfish til å spille på et lavere nivå (Skill Level 0-20)
         // Level 3-5 gir en fin og overkommelig utfordring for trening!
