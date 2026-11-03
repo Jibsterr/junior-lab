@@ -30,6 +30,7 @@ resource "azurerm_storage_blob" "sjakkmatt" {
   name                 = "index.html"
   storage_container_id = data.azurerm_storage_container.web.id
   type                 = "text/html"
+  content_type         = "text/html" 
   source               = "index.html"
 }
 
