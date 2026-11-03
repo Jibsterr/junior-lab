@@ -20,3 +20,21 @@ resource "azurerm_storage_account" "jr-lab-storage" {
     environment = "staging"
   }
 }
+
+resource "azurerm_storage_account_static_website" "sjakkmatt" {
+  storage_account_id = azurerm_storage_account.jr-lab-storage.id
+  index_document     = "index.html"
+}
+
+resource "azurerm_storage_blob" "sjakkmatt" {
+  name                 = "index.html"
+  storage_container_id = azurerm_storage_container.web.id
+  type                 = "text/html"
+  source               = "index.html"
+}
+
+data "azurerm_storage_container" "web" {
+  name               = "$web"
+  storage_account_id = data.azurerm_storage_account.jr-lab-storage.id
+  depends_on = [azurerm_storage_account_static_website.sjakkmatt]
+}
