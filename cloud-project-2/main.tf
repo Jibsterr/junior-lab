@@ -28,7 +28,7 @@ resource "azurerm_storage_account_static_website" "sjakkmatt" {
 
 resource "azurerm_storage_blob" "sjakkmatt" {
   name                 = "index.html"
-  storage_container_id = data.azurerm_storage_container.web
+  storage_container_id = data.azurerm_storage_container.web.id
   type                 = "text/html"
   source               = "index.html"
 }
