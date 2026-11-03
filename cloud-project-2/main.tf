@@ -28,13 +28,13 @@ resource "azurerm_storage_account_static_website" "sjakkmatt" {
 
 resource "azurerm_storage_blob" "sjakkmatt" {
   name                 = "index.html"
-  storage_container_id = azurerm_storage_container.web.id
+  storage_container_id = data.azurerm_storage_container.web
   type                 = "text/html"
   source               = "index.html"
 }
 
 data "azurerm_storage_container" "web" {
   name               = "$web"
-  storage_account_id = data.azurerm_storage_account.jr-lab-storage.id
+  storage_account_id = azurerm_storage_account.jr-lab-storage.id
   depends_on = [azurerm_storage_account_static_website.sjakkmatt]
 }
