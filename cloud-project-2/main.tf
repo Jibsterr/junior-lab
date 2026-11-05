@@ -39,3 +39,8 @@ data "azurerm_storage_container" "web" {
   storage_account_id = azurerm_storage_account.jr-lab-storage.id
   depends_on = [azurerm_storage_account_static_website.sjakkmatt]
 }
+
+output "sjakksiden" {
+  description = "Skriver ut nettadressen etter apply"
+  value       = azurerm_storage_account.jr-lab-storage.id
+}
