@@ -48,5 +48,5 @@ resource "azurerm_storage_blob" "index_html" {
 #Ikke testet
 output "sjakksiden" {
   description = "Skriver ut nettadressen etter apply"
-  value       = azurerm_storage_account.storage.id
+  value       = azurerm_storage_account.storage.primary_web_endpoint
 }
