@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Project 1 - Stockfish</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #1e1e2e;
+            color: #cdd6f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 { margin-bottom: 5px; color: #a6e3a1; }
+        #board { width: 400px; margin: 20px auto; }
+        .status { margin-top: 15px; font-size: 1.2rem; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>Beat the Cloud Engine</h1>
+    <p>Prosjekt 1: Din personlige sjakkmakker</p>
+    
+    <div id="board"></div>
+    <div class="status" id="status">Ditt trekk (Hvit)</div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+
+    <script>
+        var board = null;
+        var game = new Chess();
+        var $status = $('#status');
+
+        // Vi bruker en åpen Stockfish-motor over HTTP API for å unngå CORS/Worker-trøbbel i Codespaces
+        function makeComputerMove () {
+            if (game.game_over()) return;
+
+            $status.html('Stockfish tenker...');
+            
+            // Vi sender brettets posisjon (FEN) til et åpent sjakk-API som bruker Stockfish
+            var fen = game.fen();
+            $.getJSON('https://stockfish.online/api/s/v2.php?fen=' + encodeURIComponent(fen) + '&depth=5', function (data) {
+                if (data && data.success && data.bestmove) {
+                    // Bestmove kommer i formatet "bestmove e7e5 ponder..."
+                    var bestMove = data.bestmove.split(' ')[1];
+                    
+                    game.move({
+                        from: bestMove.substring(0, 2),
+                        to: bestMove.substring(2, 4),
+                        promotion: bestMove.substring(4, 5) || undefined
+                    });
+
+                    board.position(game.fen());
+                    updateStatus();
+                }
+            });
+        }
+
+        function onDragStart (source, piece, position, orientation) {
+            if (game.game_over()) return false;
+            if (piece.search(/^b/) !== -1) return false;
+        }
+
+        function onDrop (source, target) {
+            var move = game.move({
+                from: source,
+                to: target,
+                promotion: 'q'
+            });
+
+            if (move === null) return 'snapback';
+
+            updateStatus();
+            window.setTimeout(makeComputerMove, 250);
+        }
+
+        function onSnapEnd () {
+            board.position(game.fen());
+        }
+
+        function updateStatus () {
+            var status = '';
+            var moveColor = (game.turn() === 'b') ? 'Svart (Stockfish)' : 'Hvit (Deg)';
+
+            if (game.in_checkmate()) {
+                status = 'Spillet er over. ' + moveColor + ' er i sjakk matt!';
+            } else if (game.in_draw()) {
+                status = 'Spillet er over. Remis (uavgjort).';
+            } else {
+                status = moveColor + ' sitt trekk.';
+                if (game.in_check()) {
+                    status += ' (Sjakk!)';
+                }
+            }
+            $status.html(status);
+        }
+
+        var config = {
+    draggable: true,
+    position: 'start',
+    pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
+    onDragStart: onDragStart,
+    onDrop: onDrop,
+    onSnapEnd: onSnapEnd
+};
+        board = Chessboard('board', config);
+        updateStatus();
+    </script>
+</body>
+</html>
